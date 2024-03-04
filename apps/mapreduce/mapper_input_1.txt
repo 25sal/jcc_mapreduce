@@ -1,0 +1,2 @@
+{"msize": 18, "subsize": 9, "pos1x": 70736, "pos1y": 49119, "pos2x": 70752, "pos2y": 49128, "server": "Google", "style": "s", "zoom": 17, "start_row": 9, "start_col": 0, "tiles_dir": "1/0", "group": 1, "submatrices_per_group": 2}
+{"msize": 18, "subsize": 9, "pos1x": 70736, "pos1y": 49119, "pos2x": 70752, "pos2y": 49128, "server": "Google", "style": "s", "zoom": 17, "start_row": 9, "start_col": 9, "tiles_dir": "1/1", "group": 1, "submatrices_per_group": 2}
