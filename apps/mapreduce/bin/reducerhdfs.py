@@ -18,8 +18,9 @@ logging.basicConfig(level=logging.INFO)
 
 
 
-hdfs_client = InsecureClient("http://node-master:9870")
-hdfs_path="/home/spark/immagini/"
+#hdfs_client = InsecureClient("http://node-master:9870")
+hdfs_client = InsecureClient("http://node-master:50070")
+hdfs_path="/home/spark/apps/immagini/"
 
 
 def savehdfs(immagine,hdfs_filename):
@@ -46,7 +47,7 @@ def resize(infile: str, outfile: str, siz: int):
     # if this image is 2304 px 
     img=cv2.imread(infile)
     # this should be 1600px 1m per px
-    img_75 = cv2.resize(img, (siz,1504sizfx=coff_resize,fy=coff_resize)
+    img_75 = cv2.resize(img, (siz,siz),fx=coff_resize,fy=coff_resize)
     cv2.imwrite(outfile, img_75) 
 
 def merge_tiles(pos1x, pos1y, lenx, leny, tiles_dir):
@@ -100,7 +101,7 @@ def final_merging(pos1x_list, pos1y_list, output_dir):
     # Salva l'immagine finale
     return merged_image
 
-output_dir = "/home/spark/immagini/"
+output_dir = "/home/spark/apps/immagini"
 merging=False
 pos1x_list=[]
 pos1y_list=[]
@@ -141,24 +142,23 @@ if __name__ == "__main__":
         outpic.save(f"{output_dir}/{group}/{pos1x}_{pos1y}_{lenx}.tiff", format="TIFF")
 
         # resize dell'immagine a 1504
-        resize(f"{output_dir}/{group}/{pos1x}_{pos1y}_{lenx}.tiff",f"{output_dir}/{group}/{x_pos}_{y_pos}_1504.tiff", 1504)
+        resize(f"{output_dir}/{group}/{pos1x}_{pos1y}_{lenx}.tiff",f"{output_dir}/{group}/{x_pos}_{y_pos}_1500.tiff", 1500)
         logger.warning("semantic segmentation")
 
         #rete neurale per generare la mask image 
         
-        map2mask(f"{output_dir}/{group}/{x_pos}_{y_pos}_1504.tiff",f"{output_dir}/{group}/{x_pos}_{y_pos}_1504_mask.tiff")
+        map2mask(f"{output_dir}/{group}/{x_pos}_{y_pos}_1500.tiff",f"{output_dir}/{group}/{x_pos}_{y_pos}_1500_mask.tiff")
         
-        resize(f"{output_dir}/{group}/{x_pos}_{y_pos}_1504_mask.tiff",f"{output_dir}/{group}/{x_pos}_{y_pos}_1500_mask.tiff", 1500)
-       
+        #resize(f"{output_dir}/{group}/{x_pos}_{y_pos}_1504_mask.tiff",f"{output_dir}/{group}/{x_pos}_{y_pos}_1500_mask.tiff", 1500)
+        #os.remove(f"{output_dir}/{group}/{x_pos}_{y_pos}_1504_mask.tiff")
         
         if x_pos not in pos1x_list:
-            
           pos1x_list.append(x_pos)
         if y_pos not in pos1y_list: 
          pos1y_list.append(y_pos)
         #immagine=Image.open(f"{output_dir}/{group}/{x_pos}_{y_pos}_1500.tiff")
         #savehdfs(immagine,f"{output_dir}/{group}/{x_pos}_{y_pos}_1500.tiff")
-        #os.remove(f"{output_dir}/{group}/{pos1x}_{pos1y}_{lenx}.tiff")
+         
         #os.remove(f"{output_dir}/{group}/{x_pos}_{y_pos}_1500.tiff")
         
             
