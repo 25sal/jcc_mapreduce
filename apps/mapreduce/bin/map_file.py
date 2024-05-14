@@ -63,6 +63,12 @@ if __name__ == '__main__':
     N = int(lx*ly/(mod_l*submatrix_size))
     print(lenx, leny,lx,ly,N)
     outfile = open(f"mapper_input_{test}.txt", "w")
+    x_groups = int(lx/mod_l)
+    y_groups = int(ly/mod_l)   
+    group_edge = int(math.sqrt(group_size))
+
+    # print(x_groups, y_groups) 
+           
     for group in range(N):
         submatrix_batch = []
         str_line = {'msize': matrix_size, 'subsize': submatrix_size, 'pos1x': pos1x, 'pos1y': pos1y, 'pos2x': pos2x, 'pos2y': pos2y}
@@ -70,13 +76,15 @@ if __name__ == '__main__':
         str_line['style'] = 's'
         str_line['zoom'] = z
 
-        submatrix_id = group_size * group
-        subm_row = int(submatrix_id // (matrix_size // submatrix_size))
-        subm_col = int(submatrix_id % (matrix_size // submatrix_size))
+        group_row =  int(group / x_groups)
+        group_col =  int(group % x_groups)
+        subm_row = group_row * group_edge * submatrix_size
+        subm_col = group_col * group_edge * submatrix_size
+        # print(group, group_row, group_col, subm_row, subm_col)
         for i in range(group_size): 
 
-            j = int(i/math.sqrt(group_size))
-            k = int(i%math.sqrt(group_size))
+            j = int(i/group_edge)
+            k = int(i%group_edge)
 
             start_row = int(subm_row + j * submatrix_size)
             start_col = int(subm_col + k * submatrix_size)
