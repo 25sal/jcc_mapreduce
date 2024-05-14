@@ -5,6 +5,7 @@ import time
 import json
 from downloader import wgs_to_tile, get_url
 import math
+import sys
 
 logger = logging.getLogger(__name__)
 logging.basicConfig()
@@ -25,7 +26,8 @@ if __name__ == '__main__':
             'test': [41.047047, 14.282363, 41.029596, 14.326394]
             }
 
-    c_map = maps['test']
+    test = 'campania'
+    c_map = maps[test]
 
     x1 = c_map[1]
     y1 = c_map[0]
@@ -43,42 +45,51 @@ if __name__ == '__main__':
     
     matrix_size = max(lenx,leny)
     submatrix_size = 9
+    group_size = 4
 
     matrix_size = matrix_size + (submatrix_size - matrix_size % submatrix_size)
-
-    N = (int)(matrix_size / submatrix_size)
-     # Calculate the number of submatrices per worker-
-    submatrices_per_group = (matrix_size // submatrix_size) * (matrix_size // submatrix_size) // N
-    #logger.info("matrix size= {ms} submatrix size= {sms}, workers= {wrks}, subm_work= {sbmw}".format(ms=matrix_size, sms=submatrix_size, wrks=N, sbmw=submatrices_per_worker))
     tiles_dir=0
     
-
+    mod_l = submatrix_size*group_size
+    if lenx % mod_l >0:
+        lx = lenx + mod_l - lenx % mod_l
+    else:
+        lx = lenx
+    if leny % mod_l >0:
+        ly = leny + mod_l - leny % mod_l
+    else:
+        ly = leny
+    
+    N = int(lx*ly/(mod_l*submatrix_size))
+    print(lenx, leny,lx,ly,N)
+    outfile = open(f"mapper_input_{test}.txt", "w")
     for group in range(N):
         submatrix_batch = []
         str_line = {'msize': matrix_size, 'subsize': submatrix_size, 'pos1x': pos1x, 'pos1y': pos1y, 'pos2x': pos2x, 'pos2y': pos2y}
         str_line['server'] = "Google"
         str_line['style'] = 's'
         str_line['zoom'] = z
-        
-        outfile = open(f"mapper_input_{group}.txt", "w")
 
- 
-        for i in range(submatrices_per_group):
-            submatrix_id = i + submatrices_per_group * group
+        submatrix_id = group_size * group
+        subm_row = int(submatrix_id // (matrix_size // submatrix_size))
+        subm_col = int(submatrix_id % (matrix_size // submatrix_size))
+        for i in range(group_size): 
 
-            subm_row = int(submatrix_id // (matrix_size // submatrix_size))
-            subm_col = int(submatrix_id % (matrix_size // submatrix_size))
-            start_row = int(subm_row * submatrix_size)
-            start_col = int(subm_col * submatrix_size)
+            j = int(i/math.sqrt(group_size))
+            k = int(i%math.sqrt(group_size))
+
+            start_row = int(subm_row + j * submatrix_size)
+            start_col = int(subm_col + k * submatrix_size)
+
             str_line['start_row'] = start_row
             str_line['start_col'] = start_col
             str_line['tiles_dir'] = f"{group}/{tiles_dir}"
             str_line['group']=group
-            str_line['submatrices_per_group'] = submatrices_per_group
+            str_line['submatrices_per_group'] = group_size
             
             tiles_dir += 1
             
             outfile.write(json.dumps(str_line) + "\n")
         tiles_dir=0    
         
-        outfile.close()
+    outfile.close()
